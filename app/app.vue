@@ -1,6 +1,8 @@
 <template>
   <div>
-    <Toaster position="top-right" rich-colors />
+    <ClientOnly>
+      <Toaster position="top-right" rich-colors />
+    </ClientOnly>
     <NuxtRouteAnnouncer />
     <NuxtPage />
   </div>
