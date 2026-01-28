@@ -1,4 +1,5 @@
 <template>
+  <NuxtLayout name="default-layout">
   <div class="min-h-screen bg-neutral-50 py-12 px-4">
     <div class="max-w-4xl mx-auto space-y-12">
       
@@ -342,7 +343,9 @@
 
     </div>
   </div>
+  </NuxtLayout>
 </template>
+
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
