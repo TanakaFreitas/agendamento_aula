@@ -1,11 +1,13 @@
 import type { Especialidade } from '../../shared/types/Especialidade'
 import type { Profissional } from '../../shared/types/Profissional'
+import type { Profile } from '../../shared/types/Profile'
 
 export const useProfissionais = () => {
   const supabase = useSupabaseClient()
   
   const especialidades = ref<Especialidade[]>([])
   const profissionais = ref<Profissional[]>([])
+  const profiles = ref<Profile[]>([])
   const loading = ref(false)
   const error = ref<string | null>(null)
 
@@ -140,9 +142,137 @@ export const useProfissionais = () => {
     }
   }
 
+  const fetchProfiles = async () => {
+    loading.value = true
+    error.value = null
+
+    try {
+      const { data, error: rpcError } = await supabase
+        .rpc('ag_get_all_profiles_if_admin')
+
+      if (rpcError) {
+        error.value = rpcError.message
+        console.error('Erro ao buscar perfis:', rpcError)
+        return
+      }
+
+      profiles.value = data as Profile[]
+    } catch (err) {
+      error.value = 'Erro ao buscar perfis'
+      console.error(err)
+    } finally {
+      loading.value = false
+    }
+  }
+
+  const addProfissional = async (profileId: number, especialidadeId: number) => {
+    loading.value = true
+    error.value = null
+
+    try {
+      const { data, error: insertError } = await supabase
+        .from('ag_profissionais')
+        .insert({
+          profile_id: profileId,
+          especialidade_id: especialidadeId
+        } as never)
+        .select()
+
+      if (insertError) {
+        error.value = insertError.message
+        console.error('Erro ao adicionar profissional:', insertError)
+        
+        // Traduzir mensagens de erro comuns
+        let errorMessage = insertError.message
+        if (errorMessage.includes('row-level security policy')) {
+          errorMessage = 'Você não tem permissão para adicionar profissionais'
+        }
+        
+        return { success: false, message: errorMessage }
+      }
+
+      return { success: true, message: 'Profissional adicionado com sucesso' }
+    } catch (err) {
+      error.value = 'Erro ao adicionar profissional'
+      console.error(err)
+      return { success: false, message: 'Erro ao adicionar profissional' }
+    } finally {
+      loading.value = false
+    }
+  }
+
+  const updateProfissional = async (profissionalId: number, profileId: number, especialidadeId: number) => {
+    loading.value = true
+    error.value = null
+
+    try {
+      const { data, error: updateError } = await supabase
+        .from('ag_profissionais')
+        .update({
+          profile_id: profileId,
+          especialidade_id: especialidadeId
+        } as never)
+        .eq('id', profissionalId)
+        .select()
+
+      if (updateError) {
+        error.value = updateError.message
+        console.error('Erro ao atualizar profissional:', updateError)
+        
+        let errorMessage = updateError.message
+        if (errorMessage.includes('row-level security policy')) {
+          errorMessage = 'Você não tem permissão para atualizar profissionais'
+        }
+        
+        return { success: false, message: errorMessage }
+      }
+
+      return { success: true, message: 'Profissional atualizado com sucesso' }
+    } catch (err) {
+      error.value = 'Erro ao atualizar profissional'
+      console.error(err)
+      return { success: false, message: 'Erro ao atualizar profissional' }
+    } finally {
+      loading.value = false
+    }
+  }
+
+  const deleteProfissional = async (profissionalId: number) => {
+    loading.value = true
+    error.value = null
+
+    try {
+      const { error: deleteError } = await supabase
+        .from('ag_profissionais')
+        .delete()
+        .eq('id', profissionalId)
+
+      if (deleteError) {
+        error.value = deleteError.message
+        console.error('Erro ao deletar profissional:', deleteError)
+        
+        let errorMessage = deleteError.message
+        if (errorMessage.includes('row-level security policy')) {
+          errorMessage = 'Você não tem permissão para deletar profissionais'
+        }
+        
+        return { success: false, message: errorMessage }
+      }
+
+      return { success: true, message: 'Profissional deletado com sucesso' }
+    } catch (err) {
+      error.value = 'Erro ao deletar profissional'
+      console.error(err)
+      return { success: false, message: 'Erro ao deletar profissional' }
+    } finally {
+      loading.value = false
+    }
+  }
+
   return {
     especialidades,
     profissionais,
+    profiles,
     loading,
     error,
     fetchEspecialidades,
@@ -150,6 +280,10 @@ export const useProfissionais = () => {
     updateEspecialidade,
     getEspecialidadeById,
     deleteEspecialidade,
-    fetchProfissionais
+    fetchProfissionais,
+    fetchProfiles,
+    addProfissional,
+    updateProfissional,
+    deleteProfissional
   }
 }
