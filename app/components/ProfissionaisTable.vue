@@ -1,34 +1,34 @@
 <template>
-  <div id="especialidades-table" class="w-full">
+  <div id="profissionais-table" class="w-full">
     <div class="flex items-center justify-between mb-4">
-      <h2 class="text-xl font-semibold text-gray-800">Lista de Especialidades</h2>
+      <h2 class="text-xl font-semibold text-gray-800">Lista de Profissionais</h2>
       <BaseButton 
         v-if="!userStore.isUser"
-        id="btn-add-especialidade" 
+        id="btn-add-profissional" 
         variant="primary" 
         size="md"
         :disabled="!userStore.isAdmin"
-        @click="$emit('addEspecialidade')"
+        @click="$emit('addProfissional')"
       >
         <div class="flex items-center gap-2">
           <ClientOnly>
             <PlusIcon class="w-5 h-5" />
           </ClientOnly>
-          <span>Adicionar Especialidade</span>
+          <span>Adicionar Profissional</span>
         </div>
       </BaseButton>
     </div>
 
     <div v-if="loading" class="text-center py-8">
-      <p class="text-gray-600">Carregando especialidades...</p>
+      <p class="text-gray-600">Carregando profissionais...</p>
     </div>
 
     <div v-else-if="error" class="text-center py-8">
       <p class="text-red-600">{{ error }}</p>
     </div>
 
-    <div v-else-if="especialidades.length === 0" class="text-center py-8">
-      <p class="text-gray-600">Nenhuma especialidade cadastrada.</p>
+    <div v-else-if="profissionais.length === 0" class="text-center py-8">
+      <p class="text-gray-600">Nenhum profissional cadastrado.</p>
     </div>
 
     <div v-else class="overflow-x-auto">
@@ -37,6 +37,9 @@
           <tr>
             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">
               ID
+            </th>
+            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">
+              Nome
             </th>
             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">
               Especialidade
@@ -50,12 +53,15 @@
           </tr>
         </thead>
         <tbody class="divide-y divide-gray-200">
-          <tr v-for="especialidade in especialidades" :key="especialidade.id" class="hover:bg-gray-50">
+          <tr v-for="profissional in profissionais" :key="profissional.profissional_id" class="hover:bg-gray-50">
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-              {{ especialidade.id }}
+              {{ profissional.profissional_id }}
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-              {{ especialidade.especialidade || '-' }}
+              {{ profissional.nome || '-' }}
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+              {{ profissional.especialidade || '-' }}
             </td>
             <td v-if="!userStore.isUser" class="px-6 py-4 whitespace-nowrap text-sm text-center">
               <div class="flex items-center justify-center gap-2">
@@ -63,7 +69,7 @@
                   :disabled="!userStore.isAdmin"
                   class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   title="Editar"
-                  @click="$emit('editEspecialidade', especialidade.id)"
+                  @click="$emit('editProfissional', profissional.profissional_id)"
                 >
                   <ClientOnly>
                     <PencilIcon class="w-5 h-5" />
@@ -73,7 +79,7 @@
                   :disabled="!userStore.isAdmin"
                   class="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   title="Deletar"
-                  @click="$emit('deleteEspecialidade', especialidade.id)"
+                  @click="$emit('deleteProfissional', profissional.profissional_id)"
                 >
                   <ClientOnly>
                     <TrashIcon class="w-5 h-5" />
@@ -92,10 +98,10 @@
 import { PencilIcon, TrashIcon, PlusIcon } from '@heroicons/vue/24/outline'
 const userStore = useUserStore()
 
-import type { Especialidade } from '../../shared/types/Especialidade'
+import type { Profissional } from '../../shared/types/Profissional'
 
 interface Props {
-  especialidades: Especialidade[]
+  profissionais: Profissional[]
   loading: boolean
   error: string | null
 }
@@ -103,8 +109,8 @@ interface Props {
 defineProps<Props>()
 
 defineEmits<{
-  addEspecialidade: []
-  editEspecialidade: [id: number]
-  deleteEspecialidade: [id: number]
+  addProfissional: []
+  editProfissional: [id: number]
+  deleteProfissional: [id: number]
 }>()
 </script>
