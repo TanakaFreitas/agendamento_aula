@@ -28,8 +28,10 @@
 
     <!-- Conteúdo Principal -->
     <nav class="flex-1 p-4 space-y-2 overflow-y-auto">
-      <button
+      <NuxtLink
+        to="/"
         id="btn-dashboard"
+        exact-active-class="!bg-blue-50 border-l-4 border-blue-500"
         :class="[
           'w-full px-4 py-3 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors text-gray-800 flex items-center',
           isCollapsed ? 'justify-center' : 'gap-3'
@@ -39,10 +41,12 @@
           <ChartBarIcon class="w-5 h-5 flex-shrink-0" />
         </ClientOnly>
         <span v-if="!isCollapsed">Dashboard</span>
-      </button>
+      </NuxtLink>
       
-      <button
+      <NuxtLink
+        to="/especialidades"
         id="btn-especialidades"
+        active-class="!bg-blue-50 border-l-4 border-blue-500"
         :class="[
           'w-full px-4 py-3 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors text-gray-800 flex items-center',
           isCollapsed ? 'justify-center' : 'gap-3'
@@ -52,10 +56,12 @@
           <AcademicCapIcon class="w-5 h-5 flex-shrink-0" />
         </ClientOnly>
         <span v-if="!isCollapsed">Especialidades</span>
-      </button>
+      </NuxtLink>
       
-      <button
+      <NuxtLink
+        to="/agendamentos"
         id="btn-agendamentos"
+        active-class="!bg-blue-50 border-l-4 border-blue-500"
         :class="[
           'w-full px-4 py-3 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors text-gray-800 flex items-center',
           isCollapsed ? 'justify-center' : 'gap-3'
@@ -65,10 +71,12 @@
           <CalendarIcon class="w-5 h-5 flex-shrink-0" />
         </ClientOnly>
         <span v-if="!isCollapsed">Agendamentos</span>
-      </button>
+      </NuxtLink>
       
-      <button
+      <NuxtLink
+        to="/clientes"
         id="btn-clientes"
+        active-class="!bg-blue-50 border-l-4 border-blue-500"
         :class="[
           'w-full px-4 py-3 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors text-gray-800 flex items-center',
           isCollapsed ? 'justify-center' : 'gap-3'
@@ -78,10 +86,12 @@
           <UsersIcon class="w-5 h-5 flex-shrink-0" />
         </ClientOnly>
         <span v-if="!isCollapsed">Clientes</span>
-      </button>
+      </NuxtLink>
       
-      <button
+      <NuxtLink
+        to="/profissionais"
         id="btn-profissionais"
+        active-class="!bg-blue-50 border-l-4 border-blue-500"
         :class="[
           'w-full px-4 py-3 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors text-gray-800 flex items-center',
           isCollapsed ? 'justify-center' : 'gap-3'
@@ -91,7 +101,7 @@
           <UserGroupIcon class="w-5 h-5 flex-shrink-0" />
         </ClientOnly>
         <span v-if="!isCollapsed">Profissionais</span>
-      </button>
+      </NuxtLink>
     </nav>
 
     <!-- Rodapé -->
@@ -117,7 +127,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { 
   ChartBarIcon, 
   AcademicCapIcon, 
@@ -132,7 +142,15 @@ import DropdownMenu from '~/components/DropdownMenu.vue'
 
 const isCollapsed = ref(false)
 
+onMounted(() => {
+  const saved = localStorage.getItem('sidebar-collapsed')
+  if (saved !== null) {
+    isCollapsed.value = saved === 'true'
+  }
+})
+
 const toggleSidebar = () => {
   isCollapsed.value = !isCollapsed.value
+  localStorage.setItem('sidebar-collapsed', String(isCollapsed.value))
 }
 </script>
