@@ -1,6 +1,7 @@
 import type { Especialidade } from '../../shared/types/Especialidade'
 import type { Profissional } from '../../shared/types/Profissional'
 import type { Profile } from '../../shared/types/Profile'
+import type { Cliente } from '../../shared/types/Cliente'
 
 export const useProfissionais = () => {
   const supabase = useSupabaseClient()
@@ -8,6 +9,7 @@ export const useProfissionais = () => {
   const especialidades = ref<Especialidade[]>([])
   const profissionais = ref<Profissional[]>([])
   const profiles = ref<Profile[]>([])
+  const clientes = ref<Cliente[]>([])
   const loading = ref(false)
   const error = ref<string | null>(null)
 
@@ -269,10 +271,155 @@ export const useProfissionais = () => {
     }
   }
 
+  const fetchClientes = async () => {
+    loading.value = true
+    error.value = null
+
+    try {
+      const { data, error: fetchError } = await supabase
+        .from('ag_clientes')
+        .select('*')
+        .order('cliente', { ascending: true })
+
+      if (fetchError) {
+        error.value = fetchError.message
+        console.error('Erro ao buscar clientes:', fetchError)
+        return
+      }
+
+      clientes.value = data as Cliente[]
+    } catch (err) {
+      error.value = 'Erro ao buscar clientes'
+      console.error(err)
+    } finally {
+      loading.value = false
+    }
+  }
+
+  const addCliente = async (
+    cpf: string,
+    cliente: string,
+    endereco?: string,
+    email?: string,
+    telefone?: string
+  ) => {
+    loading.value = true
+    error.value = null
+
+    try {
+      const { data, error: insertError } = await supabase
+        .from('ag_clientes')
+        .insert({
+          cpf,
+          cliente,
+          endereco: endereco || null,
+          email: email || null,
+          telefone: telefone || null
+        } as never)
+        .select()
+
+      if (insertError) {
+        console.error('Erro ao adicionar cliente:', insertError)
+        
+        let errorMessage = insertError.message
+        if (errorMessage.includes('row-level security policy')) {
+          errorMessage = 'Você não tem permissão para adicionar clientes'
+        } else if (errorMessage.includes('duplicate key') || errorMessage.includes('ag_clientes_cpf_key')) {
+          errorMessage = 'CPF já cadastrado'
+        }
+        
+        return { success: false, message: errorMessage }
+      }
+
+      return { success: true, message: 'Cliente adicionado com sucesso' }
+    } catch (err) {
+      console.error(err)
+      return { success: false, message: 'Erro ao adicionar cliente' }
+    } finally {
+      loading.value = false
+    }
+  }
+
+  const updateCliente = async (
+    clienteId: number,
+    cpf: string,
+    cliente: string,
+    endereco?: string,
+    email?: string,
+    telefone?: string
+  ) => {
+    loading.value = true
+    error.value = null
+
+    try {
+      const { error: updateError } = await supabase
+        .from('ag_clientes')
+        .update({
+          cpf,
+          cliente,
+          endereco: endereco || null,
+          email: email || null,
+          telefone: telefone || null
+        } as never)
+        .eq('id', clienteId)
+
+      if (updateError) {
+        console.error('Erro ao atualizar cliente:', updateError)
+        
+        let errorMessage = updateError.message
+        if (errorMessage.includes('row-level security policy')) {
+          errorMessage = 'Você não tem permissão para atualizar clientes'
+        } else if (errorMessage.includes('duplicate key') || errorMessage.includes('ag_clientes_cpf_key')) {
+          errorMessage = 'CPF já cadastrado'
+        }
+        
+        return { success: false, message: errorMessage }
+      }
+
+      return { success: true, message: 'Cliente atualizado com sucesso' }
+    } catch (err) {
+      console.error(err)
+      return { success: false, message: 'Erro ao atualizar cliente' }
+    } finally {
+      loading.value = false
+    }
+  }
+
+  const deleteCliente = async (clienteId: number) => {
+    loading.value = true
+    error.value = null
+
+    try {
+      const { error: deleteError } = await supabase
+        .from('ag_clientes')
+        .delete()
+        .eq('id', clienteId)
+
+      if (deleteError) {
+        console.error('Erro ao deletar cliente:', deleteError)
+        
+        let errorMessage = deleteError.message
+        if (errorMessage.includes('row-level security policy')) {
+          errorMessage = 'Você não tem permissão para deletar clientes'
+        }
+        
+        return { success: false, message: errorMessage }
+      }
+
+      return { success: true, message: 'Cliente deletado com sucesso' }
+    } catch (err) {
+      console.error(err)
+      return { success: false, message: 'Erro ao deletar cliente' }
+    } finally {
+      loading.value = false
+    }
+  }
+
   return {
     especialidades,
     profissionais,
     profiles,
+    clientes,
     loading,
     error,
     fetchEspecialidades,
@@ -284,6 +431,10 @@ export const useProfissionais = () => {
     fetchProfiles,
     addProfissional,
     updateProfissional,
-    deleteProfissional
+    deleteProfissional,
+    fetchClientes,
+    addCliente,
+    updateCliente,
+    deleteCliente
   }
 }

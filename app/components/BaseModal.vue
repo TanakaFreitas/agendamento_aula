@@ -5,6 +5,7 @@
         v-if="isOpen"
         :id="`base-modal-${id}`"
         class="fixed inset-0 z-50 overflow-y-auto"
+        @mousedown="handleBackdropMouseDown"
         @click.self="handleBackdropClick"
       >
         <!-- Overlay -->
@@ -16,6 +17,7 @@
             :class="modalSizeClasses"
             class="relative bg-white rounded-lg shadow-xl transform transition-all w-full overflow-hidden"
             @click.stop
+            @mousedown.stop
           >
             <!-- Header -->
             <div class="flex items-center justify-between px-6 py-4 border-b border-neutral-200 bg-white">
@@ -74,6 +76,8 @@ const emit = defineEmits<{
   close: []
 }>()
 
+const mouseDownOnBackdrop = ref(false)
+
 const modalSizeClasses = computed(() => {
   const sizes = {
     sm: 'max-w-sm',
@@ -88,10 +92,18 @@ const handleClose = () => {
   emit('close')
 }
 
-const handleBackdropClick = () => {
-  if (props.closeOnBackdrop) {
+const handleBackdropMouseDown = (event: MouseEvent) => {
+  // Marca que o mousedown ocorreu no backdrop (não no modal)
+  mouseDownOnBackdrop.value = event.target === event.currentTarget
+}
+
+const handleBackdropClick = (event: MouseEvent) => {
+  // Só fecha se closeOnBackdrop estiver ativo E o mousedown também foi no backdrop
+  if (props.closeOnBackdrop && mouseDownOnBackdrop.value) {
     handleClose()
   }
+  // Reset para o próximo clique
+  mouseDownOnBackdrop.value = false
 }
 
 // Previne scroll do body quando modal está aberto
