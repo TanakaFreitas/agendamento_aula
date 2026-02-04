@@ -12,4 +12,12 @@
 
 <script setup lang="ts">
 import AgendamentoManager from '../components/agendamentos/AgendamentoManager.vue'
+import { useAgendamentoStore } from '../stores/agendamentoStore'
+
+const agendamentoStore = useAgendamentoStore()
+
+onMounted(() => {
+  // Inicializar o store com a data atual
+  agendamentoStore.setDataReferencia(new Date())
+})
 </script>
