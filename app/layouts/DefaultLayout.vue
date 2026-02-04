@@ -5,9 +5,7 @@
     
     <!-- Área principal à direita -->
     <main class="flex-1 overflow-y-auto bg-gray-100">
-      <div class="p-6">
-        <slot />
-      </div>
+      <slot />
     </main>
   </div>
 </template>
